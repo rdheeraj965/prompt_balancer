@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Tier LLM Gateway Telemetry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-sky-400">4-Tier Intelligent Model Router</h1>
+                <p class="text-sm text-slate-400">Real-time Telemetry & Dynamic Fallback Control</p>
+            </div>
+            <div class="text-right">
+                <span id="system-status" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    System Operational
+                </span>
+            </div>
+        </header>
+
+        <!-- Main Layout Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Prompt Input Panel -->
+            <div class="lg:col-span-1 space-y-4">
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
+                    <h2 class="text-md font-semibold text-slate-200 mb-3">Execute Query</h2>
+                    <textarea id="prompt-input" rows="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100 placeholder-slate-500" placeholder="Type a prompt to analyze routing logic..."></textarea>
+                    
+                    <button id="send-btn" class="w-full mt-3 bg-sky-600 hover:bg-sky-500 text-white font-medium py-2 rounded-lg transition-colors text-sm flex justify-center items-center">
+                        Route & Stream
+                    </button>
+                </div>
+
+                <!-- Setup Model Information -->
+                <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-xs space-y-2">
+                    <div class="font-semibold text-slate-300">Active Tier Configuration</div>
+                    <div class="flex justify-between text-slate-400"><span>Tier 1:</span> <span class="text-slate-200">gemma4:e2b (Local)</span></div>
+                    <div class="flex justify-between text-slate-400"><span>Tier 2:</span> <span class="text-slate-200">gemini-3.5-flash-lite (Cloud)</span></div>
+                    <div class="flex justify-between text-slate-400"><span>Tier 3:</span> <span class="text-slate-200">gemini-3.8-flash (Cloud)</span></div>
+                </div>
+            </div>
+
+            <!-- Telemetry & Stream Panel -->
+            <div class="lg:col-span-2 space-y-4">
+                
+                <!-- Real-time Metrics Bar -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <span class="text-xs text-slate-400 block">Active Execution Tier</span>
+                        <span id="metric-tier" class="text-base font-bold text-sky-400">--</span>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <span class="text-xs text-slate-400 block">Latency</span>
+                        <span id="metric-latency" class="text-base font-bold text-amber-400">--</span>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <span class="text-xs text-slate-400 block">Est. Execution Cost</span>
+                        <span id="metric-cost" class="text-base font-bold text-emerald-400">--</span>
+                    </div>
+                </div>
+
+                <!-- Output & Events Console -->
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex flex-col h-[420px]">
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-3">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Live Token Output</span>
+                        <span id="event-badge" class="text-xs text-slate-500 font-mono">IDLE</span>
+                    </div>
+                    <div id="output-box" class="flex-1 overflow-y-auto font-mono text-sm text-slate-300 whitespace-pre-wrap leading-relaxed pr-2">
+                        Select or enter a prompt to initiate real-time routing stream...
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

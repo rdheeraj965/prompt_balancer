@@ -3,78 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Tier LLM Gateway Telemetry</title>
+    <title>3-Tier Intelligent LLM Gateway</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js for Analytics Modal -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    <!-- Markdown, Sanitizer & KaTeX Math Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .markdown-body { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.65; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+            font-weight: 700; color: #f8fafc; margin-top: 1rem; margin-bottom: 0.4rem;
+        }
+        .markdown-body h1 { font-size: 1.25rem; }
+        .markdown-body h2 { font-size: 1.1rem; }
+        .markdown-body h3 { font-size: 1rem; color: #38bdf8; }
+        .markdown-body p { margin-bottom: 0.6rem; }
+        .markdown-body p:last-child { margin-bottom: 0; }
+        .markdown-body strong { color: #f1f5f9; font-weight: 600; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.4rem; margin-bottom: 0.6rem; }
+        .markdown-body ol { list-style-type: decimal; padding-left: 1.4rem; margin-bottom: 0.6rem; }
+        .markdown-body li { margin-bottom: 0.25rem; }
+        .markdown-body code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            background: #0f172a; color: #38bdf8; padding: 0.15rem 0.35rem;
+            border-radius: 0.25rem; font-size: 0.8em;
+        }
+        .markdown-body pre {
+            position: relative;
+            background: #020617; border: 1px solid #1e293b; border-radius: 0.5rem;
+            padding: 2rem 0.75rem 0.75rem 0.75rem; overflow-x: auto; margin: 0.6rem 0;
+        }
+        .markdown-body pre code { background: transparent; color: #e2e8f0; padding: 0; }
+        .markdown-body blockquote {
+            border-left: 3px solid #0284c7; padding-left: 0.75rem; color: #94a3b8; margin: 0.6rem 0;
+        }
+        .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.4rem 0; }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-8">
-    <div class="max-w-6xl mx-auto space-y-6">
-        
+<body class="bg-slate-950 text-slate-100 h-screen overflow-hidden flex flex-col p-4 md:p-5">
+    <div class="max-w-7xl w-full mx-auto flex-1 flex flex-col min-h-0 gap-3.5">
+
         <!-- Header -->
-        <header class="flex justify-between items-center border-b border-slate-800 pb-4">
+        <header class="shrink-0 flex flex-wrap justify-between items-center border-b border-slate-800 pb-3 gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-sky-400">4-Tier Intelligent Model Router</h1>
-                <p class="text-sm text-slate-400">Real-time Telemetry & Dynamic Fallback Control</p>
+                <h1 class="text-2xl font-bold text-sky-400">3-Tier Intelligent Model Router</h1>
+                <p class="text-xs text-slate-400">Multi-Turn Chat • Semantic Cache • PII Guardrails • Edge Telemetry</p>
             </div>
-            <div class="text-right">
-                <span id="system-status" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    System Operational
+            <div class="flex items-center gap-2.5">
+                <span id="hw-health-badge" class="px-3 py-1 rounded-full text-xs font-mono bg-slate-900 text-slate-300 border border-slate-700">
+                    Checking Hardware...
                 </span>
+                <button id="open-analytics-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 transition">
+                    📊 Analytics
+                </button>
+                <button id="new-chat-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white transition">
+                    + New Chat
+                </button>
             </div>
         </header>
 
-        <!-- Main Layout Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Prompt Input Panel -->
-            <div class="lg:col-span-1 space-y-4">
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
-                    <h2 class="text-md font-semibold text-slate-200 mb-3">Execute Query</h2>
-                    <textarea id="prompt-input" rows="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100 placeholder-slate-500" placeholder="Type a prompt to analyze routing logic..."></textarea>
-                    
-                    <button id="send-btn" class="w-full mt-3 bg-sky-600 hover:bg-sky-500 text-white font-medium py-2 rounded-lg transition-colors text-sm flex justify-center items-center">
-                        Route & Stream
-                    </button>
+        <!-- Main Layout -->
+        <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-4 gap-5">
+
+            <!-- Left Sidebar -->
+            <div class="lg:col-span-1 flex flex-col min-h-0 gap-3.5">
+                <!-- Saved Chats -->
+                <div class="flex-1 min-h-0 bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col">
+                    <div class="shrink-0 flex justify-between items-center mb-2.5">
+                        <span class="text-xs font-semibold text-slate-200 uppercase tracking-wider">Saved Chats</span>
+                        <span id="saved-count" class="text-[11px] font-mono text-slate-500">0</span>
+                    </div>
+                    <div id="saved-chats-list" class="flex-1 overflow-y-auto space-y-1.5 pr-1 text-xs">
+                        <div class="text-slate-500 italic text-[11px]">No saved conversations yet.</div>
+                    </div>
                 </div>
 
-                <!-- Setup Model Information -->
-                <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 text-xs space-y-2">
-                    <div class="font-semibold text-slate-300">Active Tier Configuration</div>
-                    <div class="flex justify-between text-slate-400"><span>Tier 1:</span> <span class="text-slate-200">gemma4:e2b (Local)</span></div>
-                    <div class="flex justify-between text-slate-400"><span>Tier 2:</span> <span class="text-slate-200">gemini-3.5-flash-lite (Cloud)</span></div>
-                    <div class="flex justify-between text-slate-400"><span>Tier 3:</span> <span class="text-slate-200">gemini-3.8-flash (Cloud)</span></div>
+                <!-- Live Edge Telemetry -->
+                <div class="shrink-0 bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-xs space-y-1.5">
+                    <div class="font-semibold text-slate-200 uppercase tracking-wider">Live Edge Telemetry</div>
+                    <div class="flex justify-between text-slate-400"><span>CPU Load:</span> <span id="hw-cpu" class="text-slate-200 font-mono">--%</span></div>
+                    <div class="flex justify-between text-slate-400"><span>System RAM:</span> <span id="hw-ram" class="text-slate-200 font-mono">--%</span></div>
+                    <div class="flex justify-between text-slate-400"><span>GPU VRAM:</span> <span id="hw-vram" class="text-slate-200 font-mono">--%</span></div>
+                    <div class="flex justify-between text-slate-400"><span>Edge Status:</span> <span id="hw-status" class="text-emerald-400 font-mono">--</span></div>
+                </div>
+
+                <!-- Prompt Scoring -->
+                <div class="shrink-0 bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-xs space-y-1.5">
+                    <div class="font-semibold text-slate-200 uppercase tracking-wider">Last Turn Analysis</div>
+                    <div class="flex justify-between text-slate-400"><span>Complexity (S):</span> <span id="score-complexity" class="text-amber-400 font-mono">--</span></div>
+                    <div class="flex justify-between text-slate-400"><span>Context Tokens (T):</span> <span id="score-tokens" class="text-amber-400 font-mono">--</span></div>
+                    <div class="flex justify-between text-slate-400"><span>Turn Latency:</span> <span id="metric-latency" class="text-amber-400 font-mono">--</span></div>
+                    <div class="flex justify-between text-slate-400"><span>Turn Cost:</span> <span id="metric-cost" class="text-emerald-400 font-mono">--</span></div>
                 </div>
             </div>
 
-            <!-- Telemetry & Stream Panel -->
-            <div class="lg:col-span-2 space-y-4">
-                
-                <!-- Real-time Metrics Bar -->
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                        <span class="text-xs text-slate-400 block">Active Execution Tier</span>
-                        <span id="metric-tier" class="text-base font-bold text-sky-400">--</span>
+            <!-- Right Panel -->
+            <div class="lg:col-span-3 flex flex-col min-h-0 gap-3">
+
+                <!-- 3-Tier Visual Pipeline -->
+                <div class="shrink-0 grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div id="node-CACHE" class="tier-node bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 transition-all duration-300 opacity-60">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-teal-400">Semantic Cache</span>
+                            <span class="node-badge text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">STANDBY</span>
+                        </div>
+                        <div class="text-sm font-bold text-slate-100 font-mono truncate">Redis Vector</div>
+                        <div class="text-[11px] text-slate-400">$0.00 • Instant Hit</div>
                     </div>
-                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                        <span class="text-xs text-slate-400 block">Latency</span>
-                        <span id="metric-latency" class="text-base font-bold text-amber-400">--</span>
+
+                    <div id="node-TIER_1_LOCAL_LIGHT" class="tier-node bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 transition-all duration-300 opacity-60">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Tier 1 • Local</span>
+                            <span class="node-badge text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">STANDBY</span>
+                        </div>
+                        <div class="text-sm font-bold text-slate-100 font-mono truncate">gemma4:e2b</div>
+                        <div class="text-[11px] text-slate-400">Ollama Edge • $0.00</div>
                     </div>
-                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                        <span class="text-xs text-slate-400 block">Est. Execution Cost</span>
-                        <span id="metric-cost" class="text-base font-bold text-emerald-400">--</span>
+
+                    <div id="node-TIER_2_CLOUD_LIGHT" class="tier-node bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 transition-all duration-300 opacity-60">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400">Tier 2 • Cloud Lite</span>
+                            <span class="node-badge text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">STANDBY</span>
+                        </div>
+                        <div class="text-sm font-bold text-slate-100 font-mono truncate">gemini-3.5-flash-lite</div>
+                        <div class="text-[11px] text-slate-400">Fast Cloud • Low Cost</div>
+                    </div>
+
+                    <div id="node-TIER_3_CLOUD_HEAVY" class="tier-node bg-slate-900/70 border border-slate-800 rounded-xl p-2.5 transition-all duration-300 opacity-60">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400">Tier 3 • Cloud Heavy</span>
+                            <span class="node-badge text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">STANDBY</span>
+                        </div>
+                        <div class="text-sm font-bold text-slate-100 font-mono truncate">gemini-3.8-flash</div>
+                        <div class="text-[11px] text-slate-400">Deep Reasoning • Max Cap</div>
                     </div>
                 </div>
 
-                <!-- Output & Events Console -->
-                <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg flex flex-col h-[420px]">
-                    <div class="flex justify-between items-center border-b border-slate-700 pb-2 mb-3">
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Live Token Output</span>
+                <!-- Security / PII Banner -->
+                <div id="security-banner" class="shrink-0 hidden bg-amber-500/10 border border-amber-500/40 text-amber-300 px-4 py-2 rounded-xl text-xs font-mono">
+                </div>
+
+                <!-- Conversation Thread -->
+                <div class="flex-1 min-h-0 bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg flex flex-col">
+                    <div class="shrink-0 flex justify-between items-center border-b border-slate-800 pb-2 mb-3">
+                        <span id="chat-session-title" class="text-xs font-semibold text-slate-300 truncate max-w-md">New Conversation</span>
                         <span id="event-badge" class="text-xs text-slate-500 font-mono">IDLE</span>
                     </div>
-                    <div id="output-box" class="flex-1 overflow-y-auto font-mono text-sm text-slate-300 whitespace-pre-wrap leading-relaxed pr-2">
-                        Select or enter a prompt to initiate real-time routing stream...
+                    <div id="chat-history" class="flex-1 overflow-y-auto space-y-4 pr-2 text-sm">
+                        <div class="text-slate-500 italic text-xs">Ask a question, attach a code file, or click a Faculty Demo Preset below to test live routing.</div>
                     </div>
                 </div>
 
+                <!-- Faculty Demo Presets & Manual Tier Override Bar -->
+                <div class="shrink-0 flex flex-wrap items-center justify-between gap-2 bg-slate-900/80 border border-slate-800 rounded-xl px-3 py-2">
+                    <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                        <span class="text-slate-500 font-semibold uppercase tracking-wider mr-1">Demo Presets:</span>
+                        <button type="button" class="demo-preset-btn px-2.5 py-1 rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition"
+                            data-prompt="Explain the difference between TCP and UDP in 3 concise bullet points.">
+                            Tier 1 Simple
+                        </button>
+                        <button type="button" class="demo-preset-btn px-2.5 py-1 rounded-md bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition"
+                            data-prompt="Architect a fault-tolerant distributed microservice infrastructure with database sharding, Redis caching, and optimize concurrency algorithms.">
+                            Tier 3 Architecture
+                        </button>
+                        <button type="button" class="demo-preset-btn px-2.5 py-1 rounded-md bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition"
+                            data-prompt="Audit this server log: admin email ops@rvce.edu.in, internal host 192.168.10.44, phone 987-654-3210, key AIzaSyDemoSecretKey1234567890123456789.">
+                            PII DLP Test
+                        </button>
+                        <button type="button" class="demo-preset-btn px-2.5 py-1 rounded-md bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 transition"
+                            data-prompt="Explain the difference between TCP and UDP in 3 concise bullet points">
+                            Semantic Cache Hit
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-2 text-xs">
+                        <label for="tier-override" class="text-slate-400 text-[11px] font-mono">Routing:</label>
+                        <select id="tier-override" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-mono text-sky-300 focus:outline-none focus:ring-1 focus:ring-sky-500">
+                            <option value="">Auto Route (Engine)</option>
+                            <option value="TIER_1_LOCAL_LIGHT">Force Tier 1 (gemma4:e2b)</option>
+                            <option value="TIER_2_CLOUD_LIGHT">Force Tier 2 (gemini-3.5-flash-lite)</option>
+                            <option value="TIER_3_CLOUD_HEAVY">Force Tier 3 (gemini-3.8-flash)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Attached File Chip (Hidden until file uploaded) -->
+                <div id="file-chip" class="shrink-0 hidden items-center justify-between bg-sky-500/10 border border-sky-500/30 rounded-lg px-3 py-1.5 text-xs font-mono text-sky-300">
+                    <span id="file-chip-label">📎 file.py (~0 tokens)</span>
+                    <button id="remove-file-btn" type="button" class="text-slate-400 hover:text-rose-400 font-bold px-1.5">×</button>
+                </div>
+
+                <!-- Input Box with File Upload & Send/Stop Button -->
+                <div class="shrink-0 flex gap-2.5">
+                    <input type="file" id="file-upload-input" class="hidden" accept=".py,.ts,.tsx,.js,.jsx,.txt,.log,.json,.md,.csv,.sql,.html,.css,.yml,.yaml">
+                    <button id="attach-file-btn" type="button" title="Attach code or log file (.py, .ts, .txt, .log)"
+                        class="px-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-sky-400 rounded-xl transition flex items-center justify-center text-base">
+                        📎
+                    </button>
+                    <textarea id="prompt-input" rows="2" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100 placeholder-slate-500 resize-none" placeholder="Enter your prompt, attach a file, or select a demo preset..."></textarea>
+                    <button id="send-btn" type="button" class="px-6 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-colors text-sm min-w-[96px]">
+                        Send
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- FinOps & Routing Analytics Modal -->
+    <div id="analytics-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 px-6 py-4">
+                <div>
+                    <h2 class="text-lg font-bold text-sky-400">FinOps & Routing Telemetry Analytics</h2>
+                    <p class="text-xs text-slate-400">Live Cost Optimization vs. Cloud-Heavy Baseline & Latency Distribution</p>
+                </div>
+                <div class="flex items-center gap-2.5">
+                    <button id="reset-analytics-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-slate-700 transition">
+                        Reset Stats
+                    </button>
+                    <button id="close-analytics-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200">
+                        Close
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6">
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
+                        <span class="text-[11px] text-slate-400 block">Total Routed Queries</span>
+                        <span id="stat-total-req" class="text-xl font-bold text-slate-100 font-mono">0</span>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
+                        <span class="text-[11px] text-slate-400 block">FinOps Cost Saved</span>
+                        <span id="stat-cost-saved" class="text-xl font-bold text-emerald-400 font-mono">$0.0000 (0%)</span>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
+                        <span class="text-[11px] text-slate-400 block">Semantic Cache Hit Rate</span>
+                        <span id="stat-cache-rate" class="text-xl font-bold text-teal-400 font-mono">0%</span>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
+                        <span class="text-[11px] text-slate-400 block">PII DLP Redactions</span>
+                        <span id="stat-pii-count" class="text-xl font-bold text-amber-400 font-mono">0</span>
+                    </div>
+                </div>
+
+                <!-- Chart.js Canvases -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Traffic Distribution by Tier</h3>
+                        <div class="h-56 flex items-center justify-center">
+                            <canvas id="tierDistributionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Average Latency by Tier (ms)</h3>
+                        <div class="h-56 flex items-center justify-center">
+                            <canvas id="latencyComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Trail Table -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2.5">Recent Routing Audit Log</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs font-mono">
+                            <thead class="text-slate-400 border-b border-slate-800">
+                                <tr>
+                                    <th class="py-2 pr-3">Time</th>
+                                    <th class="py-2 pr-3">Tier</th>
+                                    <th class="py-2 pr-3">Model</th>
+                                    <th class="py-2 pr-3">Latency</th>
+                                    <th class="py-2 pr-3">Cost</th>
+                                    <th class="py-2">Guardrails</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-audit-body" class="divide-y divide-slate-800/60 text-slate-300">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

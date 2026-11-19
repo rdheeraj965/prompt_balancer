@@ -152,21 +152,21 @@ MODEL_TIERS = {
     "TIER_1_LOCAL_LIGHT": {
         "type": "LOCAL",
         "model_name": os.getenv("TIER1_LOCAL_LIGHT_MODEL", "gemma4:e2b"),
-        "timeout": int(os.getenv("TIER1_TIMEOUT_SECONDS", 30)),
+        "timeout": int(os.getenv("TIER1_TIMEOUT_SECONDS", 45)),
     },
-    "TIER_2_LOCAL_HEAVY": {
-        "type": "LOCAL",
-        "model_name": os.getenv("TIER2_LOCAL_HEAVY_MODEL", "gemma4:12b"),
-        "timeout": int(os.getenv("TIER2_TIMEOUT_SECONDS", 120)),
-    },
-    "TIER_3_CLOUD_LIGHT": {
+    "TIER_2_CLOUD_LIGHT": {
         "type": "CLOUD",
-        "model_name": os.getenv("TIER3_CLOUD_LIGHT_MODEL", "gemini-3.5-flash-lite"),
-        "api_key": os.getenv("TIER3_CLOUD_API_KEY", ""),
+        "model_name": os.getenv("TIER2_CLOUD_LIGHT_MODEL") or os.getenv("TIER3_CLOUD_LIGHT_MODEL", "gemini-3.5-flash-lite"),
+        "api_key": os.getenv("TIER2_CLOUD_API_KEY") or os.getenv("TIER3_CLOUD_API_KEY", ""),
     },
-    "TIER_4_CLOUD_HEAVY": {
+    "TIER_3_CLOUD_HEAVY": {
         "type": "CLOUD",
-        "model_name": os.getenv("TIER4_CLOUD_HEAVY_MODEL", "gemini-3.8-flash"),
-        "api_key": os.getenv("TIER4_CLOUD_API_KEY", ""),
+        "model_name": os.getenv("TIER3_CLOUD_HEAVY_MODEL") or os.getenv("TIER4_CLOUD_HEAVY_MODEL", "gemini-3.8-flash"),
+        "api_key": os.getenv("TIER3_CLOUD_API_KEY") or os.getenv("TIER4_CLOUD_API_KEY", ""),
     },
 }
+
+# Semantic Cache & Security Thresholds
+SEMANTIC_SIMILARITY_THRESHOLD = float(os.getenv("SEMANTIC_SIMILARITY_THRESHOLD", 0.90))
+MAX_LOCAL_RAM_PERCENT = float(os.getenv("MAX_LOCAL_RAM_PERCENT", 85.0))
+MAX_LOCAL_VRAM_PERCENT = float(os.getenv("MAX_LOCAL_VRAM_PERCENT", 85.0))

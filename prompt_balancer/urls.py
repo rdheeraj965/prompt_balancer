@@ -16,11 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from router.views import RoutePromptView, DashboardView
+from router.views import RoutePromptView, DashboardView, ResetChatView, SyncChatView, SystemHealthView, AnalyticsView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', DashboardView.as_view(), name='dashboard'),
-    path('api/v1/route/', RoutePromptView.as_view(), name='route_prompt'),
-    
+    path("admin/", admin.site.urls),
+    path("", DashboardView.as_view(), name="dashboard"),
+    path("api/v1/route/", RoutePromptView.as_view(), name="route_prompt"),
+    path("api/v1/chat/reset/", ResetChatView.as_view(), name="reset_chat"),
+    path("api/v1/chat/sync/", SyncChatView.as_view(), name="sync_chat"),
+    path("api/v1/health/", SystemHealthView.as_view(), name="system_health"),
+    path("api/v1/analytics/", AnalyticsView.as_view(), name="analytics"),
 ]
